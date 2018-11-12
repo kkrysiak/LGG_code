@@ -7,6 +7,7 @@ library(Amelia)
 library(ggplot2)
 library(gridExtra)
 library(stringr)
+library(plyr)
 
 setwd('~/Box Sync/LGG/Training/')
 
@@ -53,7 +54,10 @@ cases <- cases[,!(colnames(cases) %in% drop)]
 seven <- req[which(req$section == "Role"),"main_section"]
 seven <- seven[!grepl("Roles|Written|Oral", seven)]
 
+## get a subset of cases with at least 3 roles
 three_roles <- cases[which(cases$Roles %in% seven),]
+three_roles <- count(three_roles$`CoPath.#`)
+three_roles <- three_roles[which(three_roles$freq >= 3),]
 
 ##########################################################################################################
 #### Create tables of logbook requirements
@@ -111,7 +115,7 @@ sect <- "Role"
 main <- lists$Roles[!is.na(lists$Roles)]
 sub <- c("Cases with 3 roles","Abnormal results")
 req <- rbind(req,c(sect, "Roles 1-7", "All", 100, 0, length(unique(cases[which(cases$Category %in% main[1:7]),"CoPath.#"]))))
-req <- rbind(req,c(sect, "Roles 1-7", sub[1], 180, 0, "TBD")) ############################### revisit
+req <- rbind(req,c(sect, "Roles 1-7", sub[1], 180, 0, nrow(three_roles)))
 req <- rbind(req,c(sect, main[1], "All", 0, 0, length(unique(cases[which(cases$Category == main[1]),"CoPath.#"]))))
 req <- rbind(req,c(sect, main[2], "All", 0, 0, length(unique(cases[which(cases$Category == main[2]),"CoPath.#"]))))
 req <- rbind(req,c(sect, main[3], "All", 0, 0, length(unique(cases[which(cases$Category == main[3]),"CoPath.#"]))))
@@ -141,15 +145,15 @@ color_palette=c("Not met"="red","Met"="green")
 ## Reorder factors 
 req$section <- factor(req$section, levels=disord_list)
 
-tot <- ggplot(req[which(req$section == "Total"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="Total", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 25)) + theme(legend.position="none")
+tot <- ggplot(req[which(req$section == "Total"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 25)) + theme(legend.position="none") + ggtitle("Total")
 
-cat <- ggplot(req[which(req$section == "Category"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="Category", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 30)) 
+cat <- ggplot(req[which(req$section == "Category"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 30)) + ggtitle("Category")
 
-meth <- ggplot(req[which(req$section == "Methodology"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="Methodology", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 30)) + theme(legend.position="none")
+meth <- ggplot(req[which(req$section == "Methodology"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 30)) + theme(legend.position="none") + ggtitle("Methodology")
 
-role <- ggplot(req[which(req$section == "Role"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="Role", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 25)) + theme(legend.position="none")
+role <- ggplot(req[which(req$section == "Role"),], aes(section_label, max_req)) + geom_crossbar(aes(ymin = min_req, ymax = max_req), width = 0.2, fill="grey", linetype="blank") + geom_point(aes(section_label, current, color=requirement), size = 4) + labs(x="", y="Required") + scale_color_manual(values=color_palette) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 33)) + theme(legend.position="none") + ggtitle("Role")
 
-png(file = "logbook_status.png", height=1600, width=2200, res=150)
+png(file = "logbook_status.png", height=1700, width=2700, res=150)
   grid.arrange(tot,meth,role,cat, ncol=2, layout_matrix = rbind(c(1,2,2,2,2,2),c(3,3,3,4,4,4)))
 dev.off()
 
