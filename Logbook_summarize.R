@@ -56,9 +56,9 @@ seven <- seven[!grepl("Roles|Written|Oral", seven)]
 
 ## get a subset of cases with at least 3 roles
 three_roles <- cases[which(cases$Roles %in% seven),]
-three_roles_count <- count(three_roles$`CoPath.#`)
+three_roles_count <- ddply(three_roles, .(`CoPath.#`), nrow)
 three_roles_count <- three_roles_count[which(three_roles_count$freq >= 3),]
-three_roles_abnormal <- count(three_roles[three_roles$Results_summary == "Abnormal","CoPath.#"])
+three_roles_abnormal <- ddply(three_roles, .(three_roles[three_roles$Results_summary == "Abnormal","CoPath.#"]), nrow)
 three_roles_abnormal <- three_roles_abnormal[which(three_roles_abnormal$freq >= 3),]
 
 ##########################################################################################################
