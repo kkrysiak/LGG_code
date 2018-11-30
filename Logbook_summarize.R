@@ -194,32 +194,32 @@ case_bars[grepl("Cancer",case_bars$NGS.panel),"NGS_category"] <- "Cancer"
 case_bars[grepl("Q/C",case_bars$NGS.panel),"NGS_category"] <- "Other"
 
 ## Plot case results by Testing method
-ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1)
+ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
 
 ## Plot case results by NGS panel
-ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS.panel, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1)
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS.panel, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
 
 ## Plot case results by NGS testing bin
-ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_viridis(discrete = T, direction = -1)
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
 
 ## Plot number of cases in myeloseq vs not myeloseq by NGS panel ordered
-ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
 
 ## Plot number of cases in myeloseq vs not myeloseq by indication
-ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
 
 ## Plot number of cases in each NGS order bin by indication
 png(file = "NGS_case_distribution.png", height=1700, width=1400, res=150)
-  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
 dev.off()
 
 ## Plot number of cases in each NGS order bin by indication
 png(file = "NGS_panel_distribution.png", height=1700, width=1400, res=150)
-  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
 dev.off()
 
 png(file = "NGS_result_distribution.png", height=1700, width=1400, res=150)
-  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
 dev.off()
   
 # ## Tidy naming
