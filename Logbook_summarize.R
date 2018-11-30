@@ -9,7 +9,7 @@ library(gridExtra)
 library(stringr)
 library(plyr)
 
-setwd('~/Box Sync/LGG/Training/')
+setwd('~/Box Sync/LGG/Training/Logbook/')
 
 ##########################################################################################################
 #### Read in files
@@ -24,14 +24,17 @@ lists <- read.xlsx("Logbook.xlsx",colNames=T,sheet="Dropdown inputs")
 ## Remove unused rows (Drop if no CoPath identifier)
 cases <- cases[!is.na(cases$`CoPath.#`),]
 
-## Remove notes and extra columns that may have extraneous notes (Notes and any columns beginning in X)
-cases <- cases[,colnames(cases)[!grepl("^X|Notes", colnames(cases))]]
-
 ## Add new column of results that simplifies anything abnormal
 cases$Results_summary <- NA
 cases[grepl("normal", cases$Results, ignore.case=T), "Results_summary"] <- "Normal"
 cases[grepl("unknown", cases$Results, ignore.case=T), "Results_summary"] <- "Unknown"
 cases[!grepl("normal|unknown", cases$Results, ignore.case=T) & !is.na(cases$Results), "Results_summary"] <- "Abnormal"
+
+## Output file in simple text format in case excel ever breaks
+write.table(cases, file="logbook.tsv", quote=F, row.names=F, col.names=T, sep="\t")
+
+## Remove notes and extra columns that may have extraneous notes (Notes and any columns beginning in X)
+cases <- cases[,colnames(cases)[!grepl("^X|Notes", colnames(cases))]]
 
 ##########################################################################################################
 #### Evaluate logbook overall
@@ -163,7 +166,62 @@ dev.off()
 ## Export the table
 write.table(req, file="logbook_summary.tsv", quote=F, row.names=F, col.names=T, sep="\t")
 
+##########################################################################################################
+#### Extra visualizations
+##########################################################################################################
+library(viridis)
 
+## Restrict to a subset of columns and restrict to 1 line per case (cases duplicated by multiple roles)
+case_bars <- unique(cases[,c("CoPath.#","Diagnosis/Indication","Category","Lab.Testing.Methods","NGS.panel","Sample.Type","Results_summary")])
+
+## Tidy up column names for plotting
+colnames(case_bars) <- gsub("Diagnosis/Indication", "Indication", colnames(case_bars))
+
+## Tidy up result names for plotting
+case_bars$Results_summary <- gsub("Normal", "No VUS or pathogenic / actionable variant", case_bars$Results_summary)
+case_bars$Results_summary <- gsub("Abnormal", "VUS or pathogenic / actionable variant", case_bars$Results_summary)
+
+## Create a column to categorize myeloseq vs other NGS testing easily
+case_bars$NGS_test <- "Not Myeloseq"
+case_bars[which(case_bars$NGS.panel == "Myeloseq"),"NGS_test"] <- "Myeloseq"
+
+## Bin NGS testing types
+case_bars$NGS_category <- "NA"
+case_bars[which(case_bars$NGS.panel == "Myeloseq"),"NGS_category"] <- "Myeloseq"
+case_bars[grepl("SOMA",case_bars$NGS.panel),"NGS_category"] <- "SOMA"
+case_bars[grepl("Renal",case_bars$NGS.panel),"NGS_category"] <- "Renal"
+case_bars[grepl("Cancer",case_bars$NGS.panel),"NGS_category"] <- "Cancer"
+case_bars[grepl("Q/C",case_bars$NGS.panel),"NGS_category"] <- "Other"
+
+## Plot case results by Testing method
+ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1)
+
+## Plot case results by NGS panel
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS.panel, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1)
+
+## Plot case results by NGS testing bin
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_viridis(discrete = T, direction = -1)
+
+## Plot number of cases in myeloseq vs not myeloseq by NGS panel ordered
+ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+
+## Plot number of cases in myeloseq vs not myeloseq by indication
+ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+
+## Plot number of cases in each NGS order bin by indication
+png(file = "NGS_case_distribution.png", height=1700, width=1400, res=150)
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+dev.off()
+
+## Plot number of cases in each NGS order bin by indication
+png(file = "NGS_panel_distribution.png", height=1700, width=1400, res=150)
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+dev.off()
+
+png(file = "NGS_result_distribution.png", height=1700, width=1400, res=150)
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1) 
+dev.off()
+  
 # ## Tidy naming
 # 
 # req$main <- gsub("\\S+\\. ","",req$main_section, perl=T)
