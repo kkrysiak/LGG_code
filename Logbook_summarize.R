@@ -180,6 +180,8 @@ colnames(case_bars) <- gsub("Diagnosis/Indication", "Indication", colnames(case_
 ## Tidy up result names for plotting
 case_bars$Results_summary <- gsub("Normal", "No VUS or pathogenic / actionable variant", case_bars$Results_summary)
 case_bars$Results_summary <- gsub("Abnormal", "VUS or pathogenic / actionable variant", case_bars$Results_summary)
+## Refactor order for plotting
+case_bars$Results_summary <- factor(case_bars$Results_summary, levels=c("VUS or pathogenic / actionable variant","No VUS or pathogenic / actionable variant","Unknown"))
 
 ## Create a column to categorize myeloseq vs other NGS testing easily
 case_bars$NGS_test <- "Not Myeloseq"
@@ -194,13 +196,13 @@ case_bars[grepl("Cancer",case_bars$NGS.panel),"NGS_category"] <- "Cancer"
 case_bars[grepl("Q/C",case_bars$NGS.panel),"NGS_category"] <- "Other"
 
 ## Plot case results by Testing method
-ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
+ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 
 ## Plot case results by NGS panel
-ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS.panel, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS.panel, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 
 ## Plot case results by NGS testing bin
-ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
+ggplot(case_bars[case_bars$Lab.Testing.Methods == "5. Sequence Analysis",], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack', stat="count") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22)) + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 
 ## Plot number of cases in myeloseq vs not myeloseq by NGS panel ordered
 ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=NGS.panel)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
@@ -219,7 +221,7 @@ png(file = "NGS_panel_distribution.png", height=1700, width=1400, res=150)
 dev.off()
 
 png(file = "NGS_result_distribution.png", height=1700, width=1400, res=150)
-  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50")
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 dev.off()
   
 # ## Tidy naming
