@@ -53,16 +53,18 @@ cases <- cases[,!(colnames(cases) %in% drop)]
 ##########################################################################################################
 #### Get cases with 3 roles
 ##########################################################################################################
-## Get a list of 7 required roles 
-seven <- lists[!is.na(lists$Roles),"Roles"]
-seven <- seven[!grepl("Roles|Written|Oral", seven)]
+# ## Get a list of 7 required roles 
+# seven <- lists[!is.na(lists$Roles),"Roles"]
+# seven <- seven[!grepl("Roles|Written|Oral", seven)]
+######### Roles 1-7 must be involved but 3 roles can come from roles 1-10
 
 ## get a subset of cases with at least 3 roles
-three_roles <- cases[which(cases$Roles %in% seven),]
+three_roles <- unique(cases[,c("CoPath.#","Roles","Results_summary")])
 three_roles_count <- ddply(three_roles, .(`CoPath.#`), nrow)
-three_roles_count <- three_roles_count[which(three_roles_count$freq >= 3),]
-three_roles_abnormal <- ddply(three_roles, .(three_roles[three_roles$Results_summary == "Abnormal","CoPath.#"]), nrow)
-three_roles_abnormal <- three_roles_abnormal[which(three_roles_abnormal$freq >= 3),]
+three_roles_count <- three_roles_count[which(three_roles_count$V1 >= 3),]
+three_roles_noNA <- three_roles[!is.na(three_roles$Results_summary),]
+three_roles_abnormal <- ddply(three_roles_noNA, .(three_roles_noNA[three_roles_noNA$Results_summary == "Abnormal","CoPath.#"]), nrow)
+three_roles_abnormal <- three_roles_abnormal[which(three_roles_abnormal$V1 >= 3),]
 
 ##########################################################################################################
 #### Create tables of logbook requirements
