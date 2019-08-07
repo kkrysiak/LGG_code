@@ -78,7 +78,7 @@ req[1,] <- c("Total", "Total", "-", "200", "0", length(unique(cases[which(cases$
 sect <- "Total"
 main <- c("Normal","Abnormal")
 req <- rbind(req,c(sect, main[1], "All", 0, 100, length(unique(cases[which(cases$Results_summary == "Normal"),"CoPath.#"])), NA))
-req <- rbind(req,c(sect, main[2], "All", 100, 0, length(unique(cases[which(cases$Results_summary == "Abnormal"),"CoPath.#"])), length(unique(cases[which(cases$Results_summary == "Abnormal"),"CoPath.#"]))))
+req <- rbind(req,c(sect, main[2], "All", 100, 0, NA, length(unique(cases[which(cases$Results_summary == "Abnormal"),"CoPath.#"]))))
 
 ## Testing category
 sect <- "Category"
