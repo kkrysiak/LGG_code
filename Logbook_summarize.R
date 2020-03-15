@@ -53,6 +53,9 @@ acmg1 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Results + Nome
 acmg2 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Lab.Testing.Methods + Results + Nomenclature + Supervisor + Results_summary ~ Roles)
 acmg_style <- merge(acmg1, acmg2, all=T)
 
+## Output ACMG-style file
+write.table(acmg, file=paste0("logbook_acmgstyle_",Sys.Date(),".tsv"), quote=F, row.names=F, col.names=T, sep="\t")
+
 ##########################################################################################################
 #### Evaluate logbook overall
 ##########################################################################################################
