@@ -8,8 +8,10 @@ library(ggplot2)
 library(gridExtra)
 library(stringr)
 library(plyr)
+library(reshape2)
 
-setwd('~/Box Sync/LGG/Training/Logbook/')
+#setwd('~/Box Sync/LGG/Training/Logbook/')  ## MGI macbook
+setwd('~/Box/LGG/Training/Logbook/') ## Pathology macbook
 
 ##########################################################################################################
 #### Read in files
@@ -35,6 +37,21 @@ write.table(cases, file="logbook.tsv", quote=F, row.names=F, col.names=T, sep="\
 
 ## Remove notes and extra columns that may have extraneous notes (Notes and any columns beginning in X)
 cases <- cases[,colnames(cases)[!grepl("^X|Notes", colnames(cases))]]
+
+##########################################################################################################
+#### Rework the logbook into ACMG versioning
+##########################################################################################################
+## Reduce to necessary columns
+keep <- c("Entry","Date.collected","CoPath.#","Category","Lab.Testing.Methods","Results","Nomenclature","Roles","Supervisor","Results_summary")
+acmg <- cases[,(colnames(cases) %in% keep)]
+
+## Remove problematic name
+colnames(acmg)[which(colnames(acmg) == "CoPath.#")] <- "CoPath"
+
+## Alter columns to support ACMG excel style
+acmg1 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Results + Nomenclature + Roles + Supervisor + Results_summary ~ Lab.Testing.Methods)
+acmg2 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Lab.Testing.Methods + Results + Nomenclature + Supervisor + Results_summary ~ Roles)
+acmg_style <- merge(acmg1, acmg2, all=T)
 
 ##########################################################################################################
 #### Evaluate logbook overall
