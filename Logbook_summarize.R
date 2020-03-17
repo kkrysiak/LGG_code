@@ -42,19 +42,47 @@ cases <- cases[,colnames(cases)[!grepl("^X|Notes", colnames(cases))]]
 #### Rework the logbook into ACMG versioning
 ##########################################################################################################
 ## Reduce to necessary columns
-keep <- c("Entry","Date.collected","CoPath.#","Category","Lab.Testing.Methods","Results","Nomenclature","Roles","Supervisor","Results_summary")
+keep <- c("Entry","Date.collected","CoPath.#","Case.occurrence.tally","Category","Testing.Subtype","Lab.Testing.Methods","Results","Roles","Supervisor","Results_summary")
 acmg <- cases[,(colnames(cases) %in% keep)]
 
 ## Remove problematic name
 colnames(acmg)[which(colnames(acmg) == "CoPath.#")] <- "CoPath"
 
+## Strip problematic characters
+strip <- function(x){
+  x <- gsub("\\s\\[|\\S*\\]|\\s\\(\\N*\\)", "", x, perl=T)
+  x <- gsub("\\N+\\.\\s|:", "", x, perl=T)
+  x <- gsub("\\s", "_", x, perl=T)
+  x <- gsub("\\:|_-|_&", "", x, perl=T)
+  x <- gsub("-", "_", x, perl=T)
+}
+
+acmg$Testing.Subtype <- strip(acmg$Testing.Subtype)
+acmg$Lab.Testing.Methods <- strip(acmg$Lab.Testing.Methods)
+acmg$Roles <- strip(acmg$Roles)
+acmg$Category <- gsub("2. Diagnostic testing (postnatal, non-oncology)", "2. Diagnostic testing", acmg$Category)
+
+## Replace testing subtype with NA unless NGS or mutation subtype
+acmg1 <- acmg
+acmg1$Testing.Subtype <- gsub("alone|concomitant_cytogenetics_or_molecular_method", NA, acmg1$Testing.Subtype)
+
 ## Alter columns to support ACMG excel style
-acmg1 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Results + Nomenclature + Roles + Supervisor + Results_summary ~ Lab.Testing.Methods)
-acmg2 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Lab.Testing.Methods + Results + Nomenclature + Supervisor + Results_summary ~ Roles)
+acmg1 <- dcast(acmg1, Entry + Date.collected + CoPath + Category + Results  + Supervisor + Results_summary ~ Lab.Testing.Methods + Testing.Subtype, fun.aggregate = length)
+colnames(acmg1) <- gsub("^NA","Missing.method", colnames(acmg1))
+acmg2 <- dcast(acmg, Entry + Date.collected + CoPath + Category + Testing.Subtype + Results  + Supervisor + Results_summary ~ Roles, fun.aggregate = length)
+colnames(acmg2) <- gsub("NA","Missing.role", colnames(acmg2))
+acmg2$role.count <- rowSums(acmg2[colnames(acmg2) %in% unique(acmg$Roles)])
 acmg_style <- merge(acmg1, acmg2, all=T)
 
+# ## Change names to make export easier
+# acmg_style$Category <- gsub("|\\(|\\s*\\)","",acmg_style$Category,perl=T)
+# colnames(acmg_style) <- colnames(acmg_style)[!(colnames(acmg_style)) %in% c("NA","Roles")]
+# colnames(acmg_style) <- gsub("\\s\\[|\\S*\\]|\\(|\\s*\\)","",colnames(acmg_style),perl=T)
+# colnames(acmg_style) <- gsub("\\N+\\.\\s|:","",colnames(acmg_style),perl=T)
+# colnames(acmg_style) <- gsub("\\s_-","_",colnames(acmg_style),perl=T)
+
 ## Output ACMG-style file
-write.table(acmg, file=paste0("logbook_acmgstyle_",Sys.Date(),".tsv"), quote=F, row.names=F, col.names=T, sep="\t")
+write.table(acmg_style, file=paste0("logbook_acmgstyle_",Sys.Date(),".tsv"), quote=F, row.names=F, col.names=T, sep="\t")
 
 ##########################################################################################################
 #### Evaluate logbook overall
