@@ -162,8 +162,8 @@ for(i in 1:length(mut)){
   req <- rbind(req,c(sect, main[4], mut[i], 5, 5, length(unique(cases[which(cases$Lab.Testing.Methods == main[4] & cases$Testing.Subtype == mut[i]),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[4] & cases$Testing.Subtype == mut[i] & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
 }
 req <- rbind(req,c(sect, main[5], "All", 40, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5]),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
-req <- rbind(req,c(sect, main[5], "Sanger", 10, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]"),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]" & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
-req <- rbind(req,c(sect, main[5], "NGS", 10, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype)),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype) & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
+req <- rbind(req,c(sect, main[5], "Sanger", 10, 40, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]"),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]" & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
+req <- rbind(req,c(sect, main[5], "NGS", 10, 40, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype)),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype) & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
 
 ## Role 
 sect <- "Role"
@@ -193,7 +193,7 @@ req$max_req <- as.numeric(req$max_req)
 req$current <- as.numeric(req$current)
 req$current_abnormal <- as.numeric(req$current_abnormal)
 req$requirement <- "Not met"
-req[which(req$current > req$min_req),"requirement"] <- "Met"
+req[which(req$current >= req$min_req),"requirement"] <- "Met"
 req$requirement_abnormal <- "Not met"
 req[which(req$current_abnormal > req$min_req),"requirement_abnormal"] <- "Met"
 req$shape <- 21
