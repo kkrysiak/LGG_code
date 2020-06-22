@@ -242,8 +242,9 @@ case_bars$NGS_category <- "NA"
 case_bars[which(case_bars$NGS.panel == "Myeloseq"),"NGS_category"] <- "Myeloseq"
 case_bars[grepl("SOMA",case_bars$NGS.panel),"NGS_category"] <- "SOMA"
 case_bars[grepl("Renal",case_bars$NGS.panel),"NGS_category"] <- "Renal"
-case_bars[grepl("Cancer",case_bars$NGS.panel),"NGS_category"] <- "Cancer"
-case_bars[grepl("Q/C",case_bars$NGS.panel),"NGS_category"] <- "Other"
+case_bars[grepl("Cancer|TP53",case_bars$NGS.panel),"NGS_category"] <- "Cancer"
+case_bars[grepl("Send Out",case_bars$NGS.panel),"NGS_category"] <- "Send Out"
+case_bars[grepl("Q/C|Neutropenia|Cardiac",case_bars$NGS.panel),"NGS_category"] <- "Other"
 
 ## Plot case results by Testing method
 ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
