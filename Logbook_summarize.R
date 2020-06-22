@@ -10,8 +10,8 @@ library(stringr)
 library(plyr)
 library(reshape2)
 
-#setwd('~/Box Sync/LGG/Training/Logbook/')  ## MGI macbook
-setwd('~/Box/LGG/Training/Logbook/') ## Pathology macbook
+setwd('~/Box Sync/LGG/Training/Logbook/')  ## MGI macbook
+#setwd('~/Box/LGG/Training/Logbook/') ## Pathology macbook
 
 ##########################################################################################################
 #### Read in files
@@ -162,8 +162,8 @@ for(i in 1:length(mut)){
   req <- rbind(req,c(sect, main[4], mut[i], 5, 5, length(unique(cases[which(cases$Lab.Testing.Methods == main[4] & cases$Testing.Subtype == mut[i]),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[4] & cases$Testing.Subtype == mut[i] & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
 }
 req <- rbind(req,c(sect, main[5], "All", 40, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5]),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
-req <- rbind(req,c(sect, main[5], "Sanger", 50, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]"),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]" & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
-req <- rbind(req,c(sect, main[5], "NGS", 0, 20, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype)),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype) & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
+req <- rbind(req,c(sect, main[5], "Sanger", 10, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]"),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & cases$Testing.Subtype == "Sequencing: Sanger [5.a]" & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
+req <- rbind(req,c(sect, main[5], "NGS", 10, 0, length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype)),"CoPath.#"])), length(unique(cases[which(cases$Lab.Testing.Methods == main[5] & grepl("NGS", cases$Testing.Subtype) & cases$Results_summary == "Abnormal"),"CoPath.#"]))))
 
 ## Role 
 sect <- "Role"
