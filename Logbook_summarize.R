@@ -262,13 +262,13 @@ ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),
 
 ######## Export plots
 ## Plot case results by Testing method
-png(file = "NGS_case_distribution.png", height=1700, width=1400, res=150)
+png(file = "Overall_case_distribution.png", height=1700, width=1400, res=150)
   ggplot(case_bars, aes(x=Lab.Testing.Methods, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 22))  + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 dev.off()
 
 ## Plot number of cases in each NGS order bin by indication
-png(file = "NGS_case_distribution.png", height=1700, width=1400, res=150)
-  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
+png(file = "NGS_case_distribution.png", height=2700, width=1450, res=150)
+  ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") + theme(legend.position = "bottom", legend.key.size = unit(6, "points")) + guides(fill=guide_legend(nrow=100, byrow=TRUE))
 dev.off()
 
 ## Plot number of cases in each NGS order bin by indication
