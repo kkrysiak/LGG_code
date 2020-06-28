@@ -227,6 +227,14 @@ case_bars <- unique(cases[,c("CoPath.#","Diagnosis/Indication","Category","Lab.T
 ## Tidy up column names for plotting
 colnames(case_bars) <- gsub("Diagnosis/Indication", "Indication", colnames(case_bars))
 
+## Create a function that will upper case the first letter (fix up Indication)
+firstup <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
+case_bars$Indication <- firstup(case_bars$Indication)
+
 ## Tidy up result names for plotting
 case_bars$Results_summary <- gsub("Normal", "No VUS or pathogenic / actionable variant", case_bars$Results_summary)
 case_bars$Results_summary <- gsub("Abnormal", "VUS or pathogenic / actionable variant", case_bars$Results_summary)
@@ -261,6 +269,31 @@ ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),
 ## Plot number of cases in myeloseq vs not myeloseq by indication
 ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_test, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
 
+######## Create MyeloSeq-only subset
+case_bars_myeloseq <- case_bars[which(case_bars$NGS.panel == "Myeloseq"),]
+
+## create an indication category
+case_bars_myeloseq$Indication_category <- NA
+case_bars_myeloseq$Indication_category <- case_bars_myeloseq$Indication
+## remove extra words
+case_bars_myeloseq$Indication_category <- gsub("New ", "", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("Relapsed ", "", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub(" relapse", "", case_bars_myeloseq$Indication_category)
+## Merge groups
+case_bars_myeloseq$Indication_category <- gsub("Aplastic Anemia", "Aplastic anemia", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub(" \\(PNH clone\\)", "", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub(", t-MDS", "", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("Pancytopenia|Eosinophilia|Myeloma vs MDS vs CHIP/MGUS|Anemia, neutropenia, thrombocytopenia|Lymphopenia|Leukopenia, c/f MDS|Thrombocytopenia|Neutropenia r/o MDS|Pancytopenia|R/o MDS|Cytopenia, MDS, AML|Neutropenia|Cytopenia, MDS, AML|Cytopenia and myelofibrosis|Anemia|Cytopenia, MDS, AML|Cytopenia and myelofibrosis|ICUS", "Cytopenia", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("Cytopenia, neutropenia and thrombocytopenia|Cytopenia, MDS, AML", "Cytopenia", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("PMF|Myelofibrosis|Essential thrombocythemia|CMML", "MPN", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("MDS, MPN", "MDS/MPN", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("DLBCL post CAR-T, c/f tMDS", "R/o MDS", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("Hereditary spherocytosis, leukocytosis|Thrombocytosis|Cytopenia, acute leukemia", "Other", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("Cytopenia and myelofibrosis|MDS vs ITP|ET vs AML|MDS or AML|AML vs histiocytosis|Myeloid sarcoma|R/o MDS|Possible AML", "Uncertain myeloid disorder", case_bars_myeloseq$Indication_category)
+case_bars_myeloseq$Indication_category <- gsub("B-ALL|ALL|MGUS|Hairy cell leukemia", "Lymphoid disorder", case_bars_myeloseq$Indication_category)
+
+unique(case_bars_myeloseq$Indication_category)
+
 ######## Export plots
 ## Plot case results by Testing method
 png(file = "Overall_case_distribution.png", height=1700, width=1400, res=150)
@@ -286,6 +319,15 @@ png(file = "NGS_result_distribution.png", height=1700, width=1400, res=150)
   ggplot(case_bars[which(case_bars$Lab.Testing.Methods == "5. Sequence Analysis"),], aes(x=NGS_category, fill=Results_summary)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_manual(values=c("No VUS or pathogenic / actionable variant"="green3","VUS or pathogenic / actionable variant"="red2","Unknown"="grey"), na.value="grey50")
 dev.off()
   
+## Plot number of cases in myeloseq by indication
+png(file = "MyeloSeq_indication.png", height=2000, width=1200, res=150)
+  ggplot(case_bars[which(case_bars$NGS.panel == "Myeloseq"),], aes(x=NGS_test, fill=Indication)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") + theme(legend.position = "right", legend.key.size = unit(6, "points")) + guides(fill=guide_legend(nrow=100, byrow=TRUE))
+dev.off()
+
+png(file = "MyeloSeq_indication_grouped.png", height=1700, width=1400, res=150)
+  ggplot(case_bars_myeloseq, aes(x=Sample.Type, fill=Indication_category)) + geom_bar(position = 'stack') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + scale_fill_viridis(discrete = T, direction = -1, na.value="grey50") 
+dev.off()
+
 # ## Tidy naming
 # 
 # req$main <- gsub("\\S+\\. ","",req$main_section, perl=T)
